@@ -1,0 +1,21 @@
+{
+  "name": "producer-service-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "admin",
+    "database.password": "secure_password_123",
+    "database.dbname": "debezium",
+    "database.server.name": "dbserver1",
+    "topic.prefix": "dbserver1",
+    "table.include.list": "public.users,public.orders",
+    "plugin.name": "pgoutput",
+    "publication.autocreate.mode": "filtered",
+    "slot.name": "debezium_slot",
+    "transforms": "route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+)\\.([^.]+)\\.([^.]+)",
+    "transforms.route.replacement": "$1_$2_$3"
+  }
+}

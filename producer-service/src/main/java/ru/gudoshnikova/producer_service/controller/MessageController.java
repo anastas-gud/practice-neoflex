@@ -13,8 +13,7 @@ import java.util.List;
 public class MessageController {
     private final TopicMessageProducer topicMessageProducer;
     @PostMapping("/message")
-    public ResponseEntity<Void> message(
-            @RequestParam() String message) {
+    public ResponseEntity<Void> message(@RequestParam() String message) {
         topicMessageProducer.sendMessage(message);
         return ResponseEntity
                 .status(HttpStatus.OK)
