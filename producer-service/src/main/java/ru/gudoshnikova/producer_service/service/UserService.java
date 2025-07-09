@@ -3,6 +3,7 @@ package ru.gudoshnikova.producer_service.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.gudoshnikova.producer_service.exception.UserNotFoundException;
+import ru.gudoshnikova.producer_service.exception.UserValidationException;
 import ru.gudoshnikova.producer_service.model.User;
 import ru.gudoshnikova.producer_service.repository.UserRepository;
 
@@ -13,32 +14,58 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    public List<User> findAll(){
-        return userRepository.findAll();
-    }
-    public Optional<User> findById(int id){
-        return userRepository.findById(id);
-    }
-    public User save(User user){
-        return userRepository.save(user);
-    }
-    public User update(int id, User userDetails){
-        Optional<User> optionalUser = findById(id);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            user.setName(userDetails.getName());
-            user.setEmail(userDetails.getEmail());
-            return save(user);
+
+    public List<User> findAll() {
+        try {
+            return userRepository.findAll();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to retrieve users", e);
         }
-        throw new UserNotFoundException(id);
     }
-    public void delete(User user){
-        userRepository.delete(user);
+
+    public User findById(int id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
-    public boolean existsById(int id) {
-        return userRepository.existsById(id);
+
+    public User save(User user) {
+        validateUser(user);
+        try {
+            return userRepository.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save user", e);
+        }
     }
+
+    public User update(int id, User userDetails) {
+        validateUser(userDetails);
+        User user = findById(id);
+        user.setName(userDetails.getName());
+        user.setEmail(userDetails.getEmail());
+        try {
+            return userRepository.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update user", e);
+        }
+    }
+
     public void deleteById(int id) {
-        userRepository.deleteById(id);
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException(id);
+        }
+        try {
+            userRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete user", e);
+        }
+    }
+
+    private void validateUser(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            throw new UserValidationException("User name cannot be empty");
+        }
+        if (user.getEmail() == null || !user.getEmail().contains("@")) {
+            throw new UserValidationException("Invalid email format");
+        }
     }
 }

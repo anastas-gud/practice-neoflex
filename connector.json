@@ -13,6 +13,7 @@
     "plugin.name": "pgoutput",
     "publication.autocreate.mode": "filtered",
     "slot.name": "debezium_slot",
+    "decimal.handling.mode": "string",
     "transforms": "route",
     "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
     "transforms.route.regex": "([^.]+)\\.([^.]+)\\.([^.]+)",
